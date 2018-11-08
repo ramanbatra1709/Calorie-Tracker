@@ -27,8 +27,8 @@ const ItemController = (function(){
     };
 
     return {
-        getState: function() {
-            return state;
+        getItems: function() {
+            return state.items;
         }
     };
 })();
