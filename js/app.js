@@ -34,15 +34,25 @@ const ItemController = (function(){
 })();
 
 const UIController = (function(){
+    const UIItems = {
+        itemList: '#item-list'
+    };
     return  {
-        
+        populateItems: function(items)   {
+            let outputHTML = '';
+            items.forEach(function(item) {
+                outputHTML += `<li id="item-${item.id}" class="collection-item"><strong>${item.name}: </strong><em>${item.calories} Calories</em><a class="secondary-content"><i class="edit-item fa fa-pencil"></i></a></li>`;
+            });
+            document.querySelector(UIItems.itemList).innerHTML = outputHTML;
+        }
     };
 })();
 
 const AppController = (function(ItemController, UIController){
     return {
         init: function()    {
-
+            const items = ItemController.getItems();
+            UIController.populateItems(items);
         }
     };
 })(ItemController, UIController);
