@@ -1,4 +1,4 @@
-const ItemController = (function(){
+const ItemController = (function()  {
     const Item = function(id, name, calories) {
         this.id = id;
         this.name = name;
@@ -27,6 +27,13 @@ const ItemController = (function(){
     };
 
     return {
+        addItem: function(name, calories) {
+            const id = state.items.length > 0 ? state.items[state.items.length -1].id + 1: 0;
+            calories = parseInt(calories);
+            const newItem = new Item(id, name, calories);
+            state.items.push(newItem);
+            return newItem;
+        },
         getItems: function() {
             return state.items;
         }
@@ -35,9 +42,21 @@ const ItemController = (function(){
 
 const UIController = (function(){
     const UIItems = {
-        itemList: '#item-list'
+        addBtn: '.add-btn',
+        itemList: '#item-list',
+        itemCaloriesInput: '#item-calories',
+        itemNameInput: '#item-name'
     };
     return  {
+        getItemInput: function()    {
+            return {
+                calories: document.querySelector(UIItems.itemCaloriesInput).value,
+                name: document.querySelector(UIItems.itemNameInput).value
+            };       
+        },
+        getUIItems: function()  {
+            return UIItems;
+        },
         populateItems: function(items)   {
             let outputHTML = '';
             items.forEach(function(item) {
@@ -49,10 +68,22 @@ const UIController = (function(){
 })();
 
 const AppController = (function(ItemController, UIController){
+    const loadEventListeners = function()   {
+        const UIItems = UIController.getUIItems();
+        document.querySelector(UIItems.addBtn).addEventListener('click', addItemSubmit);
+    }
+    const addItemSubmit = function(e) {
+        const itemInput = UIController.getItemInput();
+        if (itemInput.calories !== '' && itemInput.name !== '') {
+            const newItem = ItemController.addItem(itemInput.name, itemInput.calories);
+        }
+        e.preventDefault();
+    }
     return {
         init: function()    {
             const items = ItemController.getItems();
             UIController.populateItems(items);
+            loadEventListeners();
         }
     };
 })(ItemController, UIController);
