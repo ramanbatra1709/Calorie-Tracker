@@ -5,23 +5,7 @@ const ItemController = (function()  {
         this.calories = calories;
     }
     const state = {
-        items: [
-            {
-                id: 0,
-                name: 'Dinner',
-                calories: 1200
-            },
-            {
-                id: 1,
-                name: 'Cookies',
-                calories: 400
-            },
-            {
-                id: 2,
-                name: 'Eggs',
-                calories: 300
-            }
-        ],
+        items: [],
         currentItem: null,
         totalCalories: 0
     };
@@ -48,6 +32,17 @@ const UIController = (function(){
         itemNameInput: '#item-name'
     };
     return  {
+        addItem: function(item) {
+            const li = document.createElement('li');
+            li.className = "collection-item";
+            li.id = `item-${item.id}`;
+            li.innerHTML = `<strong>${item.name}: </strong><em>${item.calories} Calories</em><a class="secondary-content"><i class="edit-item fa fa-pencil"></i></a>`;
+            document.querySelector(UIItems.itemList).insertAdjacentElement('beforeend', li);
+        },
+        clearInputs: function() {
+            document.querySelector(UIItems.itemCaloriesInput).value = '';
+            document.querySelector(UIItems.itemNameInput).value = '';
+        },
         getItemInput: function()    {
             return {
                 calories: document.querySelector(UIItems.itemCaloriesInput).value,
@@ -76,6 +71,8 @@ const AppController = (function(ItemController, UIController){
         const itemInput = UIController.getItemInput();
         if (itemInput.calories !== '' && itemInput.name !== '') {
             const newItem = ItemController.addItem(itemInput.name, itemInput.calories);
+            UIController.addItem(newItem);
+            UIController.clearInputs();
         }
         e.preventDefault();
     }
