@@ -18,6 +18,11 @@ const ItemController = (function()  {
             state.items.push(newItem);
             return newItem;
         },
+        deleteItem: function(id)  {
+            state.items = state.items.filter(function(item)    {
+                return item.id !== id;
+            });
+        },
         getCurrentItem: function()  {
             return state.currentItem;
         },
@@ -84,6 +89,9 @@ const UIController = (function(){
             document.querySelector(UIItems.itemCaloriesInput).value = '';
             document.querySelector(UIItems.itemNameInput).value = '';
         },
+        deleteItem: function(id)  {
+            document.querySelector(`#item-${id}`).remove();
+        },
         displayEditState: function(display)  {
             let displayAdd = 'inline', displayEdit = 'none';
             display ? (displayEdit = 'inline', displayAdd = 'none') : this.clearInputs();
@@ -126,6 +134,8 @@ const AppController = (function(ItemController, UIController){
     const loadEventListeners = function()   {
         const UIItems = UIController.getUIItems();
         document.querySelector(UIItems.addBtn).addEventListener('click', addItemSubmit);
+        document.querySelector(UIItems.backBtn).addEventListener('click', UIController.displayEditState(false));
+        document.querySelector(UIItems.deleteBtn).addEventListener('click', deleteItemSubmit);
         document.querySelector(UIItems.itemList).addEventListener('click', editItemSubmit);
         document.querySelector(UIItems.updateBtn).addEventListener('click', updateItemSubmit);
     }
@@ -137,6 +147,13 @@ const AppController = (function(ItemController, UIController){
             UIController.showTotalCalories(ItemController.getTotalCalories());
             UIController.clearInputs();
         }
+        event.preventDefault();
+    }
+    const deleteItemSubmit = function(event) {
+        ItemController.deleteItem(ItemController.getCurrentItem().id);
+        UIController.deleteItem(ItemController.getCurrentItem().id);
+        UIController.showTotalCalories(ItemController.getTotalCalories());
+        UIController.displayEditState(false);
         event.preventDefault();
     }
     const editItemSubmit = function(event) {
