@@ -18,12 +18,27 @@ const ItemController = (function()  {
             state.items.push(newItem);
             return newItem;
         },
+        getCurrentItem: function()  {
+            return state.currentItem;
+        },
+        getItem : function(id)  {
+            let item = null;
+            state.items.forEach((value) => {
+                if (value.id === id) {
+                    item = value;
+                }
+            });
+            return item;
+        },
         getItems: function() {
             return state.items;
         },
         getTotalCalories: function()    {
             state.totalCalories = state.items.reduce((total, item) => total + item.calories, 0);
             return state.totalCalories;
+        },
+        setCurrentItem: function(item)  {
+            state.currentItem = item;
         }
     };
 })();
@@ -31,10 +46,14 @@ const ItemController = (function()  {
 const UIController = (function(){
     const UIItems = {
         addBtn: '.add-btn',
+        backBtn: '.back-btn',
+        deleteBtn: '.delete-btn',
+        editBtn: 'edit-item',
         itemList: '#item-list',
         itemCaloriesInput: '#item-calories',
         itemNameInput: '#item-name',
-        totalCalories: '.total-calories'
+        totalCalories: '.total-calories',
+        updateBtn: '.update-btn'
     };
     return  {
         addItem: function(item) {
@@ -44,9 +63,21 @@ const UIController = (function(){
             li.innerHTML = `<strong>${item.name}: </strong><em>${item.calories} Calories</em><a class="secondary-content"><i class="edit-item fa fa-pencil"></i></a>`;
             document.querySelector(UIItems.itemList).insertAdjacentElement('beforeend', li);
         },
+        addItemToForm: function()   {
+            document.querySelector(UIItems.itemCaloriesInput).value = ItemController.getCurrentItem().calories;
+            document.querySelector(UIItems.itemNameInput).value = ItemController.getCurrentItem().name;
+        },
         clearInputs: function() {
             document.querySelector(UIItems.itemCaloriesInput).value = '';
             document.querySelector(UIItems.itemNameInput).value = '';
+        },
+        displayEditState: function(display)  {
+            let displayAdd = 'inline', displayEdit = 'none';
+            display ? (displayEdit = 'inline', displayAdd = 'none') : this.clearInputs();
+            document.querySelector(UIItems.addBtn).style.display = displayAdd;
+            document.querySelector(UIItems.backBtn).style.display = displayEdit;
+            document.querySelector(UIItems.deleteBtn).style.display = displayEdit;
+            document.querySelector(UIItems.updateBtn).style.display = displayEdit;
         },
         getItemInput: function()    {
             return {
@@ -74,8 +105,9 @@ const AppController = (function(ItemController, UIController){
     const loadEventListeners = function()   {
         const UIItems = UIController.getUIItems();
         document.querySelector(UIItems.addBtn).addEventListener('click', addItemSubmit);
+        document.querySelector(UIItems.itemList).addEventListener('click', updateItemSubmit);
     }
-    const addItemSubmit = function(e) {
+    const addItemSubmit = function(event) {
         const itemInput = UIController.getItemInput();
         if (itemInput.calories !== '' && itemInput.name !== '') {
             const newItem = ItemController.addItem(itemInput.name, itemInput.calories);
@@ -83,10 +115,21 @@ const AppController = (function(ItemController, UIController){
             UIController.showTotalCalories(ItemController.getTotalCalories());
             UIController.clearInputs();
         }
-        e.preventDefault();
+        event.preventDefault();
+    }
+    const updateItemSubmit = function(event) {
+        if (event.target.classList.contains(UIController.getUIItems().editBtn))   {
+            const itemId = parseInt(event.target.parentNode.parentNode.id.split('-')[1]);
+            const item = ItemController.getItem(itemId);
+            ItemController.setCurrentItem(item);
+            UIController.addItemToForm();
+            UIController.displayEditState(true);
+        }
+        event.preventDefault();
     }
     return {
         init: function()    {
+            UIController.displayEditState(false);
             const items = ItemController.getItems();
             UIController.populateItems(items);
             UIController.showTotalCalories(ItemController.getTotalCalories());
