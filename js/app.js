@@ -1,11 +1,32 @@
 const StorageController = (function()   {
     return  {
+        clearItems: function()  {
+            localStorage.removeItem('items');
+        },
         getItems: function()    {
             return localStorage.getItem('items') === null ? [] : JSON.parse(localStorage.getItem('items'));
-        },
-        storeItem: function(item)   {
+        }, 
+        deleteItem: function(id)   {
             let items = this.getItems();
-            items.push(item);
+            items.forEach(function(item, index)    {
+                if (id === item.id) {
+                    items.splice(index, 1);
+                }
+            });
+            localStorage.setItem('items', JSON.stringify(items));
+        },
+        updateItem: function(updatedItem) {
+            let items = this.getItems();
+            items.forEach(function(item, index)    {
+                if (updatedItem.id === item.id) {
+                    items.splice(index, 1, updatedItem);
+                }
+            });
+            localStorage.setItem('items', JSON.stringify(items));
+        },
+        storeItem: function(newItem)   {
+            let items = this.getItems();
+            items.push(newItem);
             localStorage.setItem('items', JSON.stringify(items));
         }
     };
@@ -177,6 +198,7 @@ const AppController = (function(ItemController, StorageController, UIController)
         ItemController.clearItems();
         UIController.clearItems();
         UIController.showTotalCalories(ItemController.getTotalCalories());
+        StorageController.clearItems();
         UIController.displayEditState(false);
         event.preventDefault();
     }
@@ -184,6 +206,7 @@ const AppController = (function(ItemController, StorageController, UIController)
         ItemController.deleteItem(ItemController.getCurrentItem().id);
         UIController.deleteItem(ItemController.getCurrentItem().id);
         UIController.showTotalCalories(ItemController.getTotalCalories());
+        StorageController.deleteItem(ItemController.getCurrentItem().id);
         UIController.displayEditState(false);
         event.preventDefault();
     }
@@ -203,6 +226,7 @@ const AppController = (function(ItemController, StorageController, UIController)
             const updatedItem = ItemController.updateItem(itemInput.name, itemInput.calories);
             UIController.updateItem(updatedItem);
             UIController.showTotalCalories(ItemController.getTotalCalories());
+            StorageController.updateItem(updatedItem);
             UIController.displayEditState(false);
         }
         event.preventDefault();
